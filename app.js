@@ -423,7 +423,8 @@ function generateSwaggerSpec(app) {
       version: '1.0.0',
       description: 'Auto-generated API documentation for all registered Express routes.'
     },
-    servers: [{ url: `http://localhost:${port}` }],
+    //servers: [{ url: `http://localhost:${port}` }],
+     servers: [{ url: `https://homserviceplateform.onrender.com` }],
     paths
   };
 }
@@ -436,7 +437,8 @@ const swaggerDefinition = {
     version: '1.0.0',
     description: 'Combined auto-generated and JSDoc-based API documentation.'
   },
-  servers: [{ url: `http://localhost:${port}` }]
+  //servers: [{ url: `http://localhost:${port}` }]
+  servers: [{ url: `https://homserviceplateform.onrender.com` }],
 };
 
 const jsdocOptions = {
