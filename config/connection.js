@@ -57,7 +57,7 @@ async function connectToDatabase() {
         db = client.db("HomeAssist");
 
         // CREATE DEFAULT ADMIN HERE 👇
-        await createDefaultAdmin(db);
+      //  await createDefaultAdmin(db);
 
         return db;
     } catch (err) {

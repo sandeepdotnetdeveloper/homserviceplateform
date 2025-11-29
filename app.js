@@ -15,7 +15,7 @@ const swaggerJsdoc = require('swagger-jsdoc');
 
 const corsOptions = {
  
-  origin: 'http://192.168.1.6',
+  origin: '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true,
 };
