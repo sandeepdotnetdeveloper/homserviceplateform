@@ -29,6 +29,27 @@ app.use(express.static("public"));
 
 // Admin Routes
 
+/**
+ * @openapi
+ * /admin-registration:
+ *   get:
+ *     tags:
+ *       - Admin
+ *     summary: View all admin registrations
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       '200':
+ *         description: List of admin registrations
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *       '401':
+ *         description: Unauthorized
+ */
 app.get("/admin-registration",adminAuthMiddleware,indexController.ViewAdmin);
 app.post("/admin-registration",adminAuthMiddleware,indexController.AdminRegistration);
 app.delete("/admin-registration/:id",adminAuthMiddleware,indexController.DeleteAdmin);
@@ -420,8 +441,8 @@ const swaggerDefinition = {
 
 const jsdocOptions = {
   definition: swaggerDefinition,
-  // scan this file and controller files for JSDoc comments
-  apis: [__filename, __dirname + '/controller/*.js']
+  // scan this file, swagger definitions file, and controller files for JSDoc comments
+  apis: [__filename, __dirname + '/swaggerDefinitions.js', __dirname + '/controller/*.js']
 };
 
 const jsdocSpec = swaggerJsdoc(jsdocOptions);
