@@ -1,0 +1,448 @@
+const express = require('express'); // Import Express
+const app = express(); // Initialize the Express app
+const cors = require('cors'); // Import mysql2 package
+const indexController  = require("./controller/indexController");
+const {adminAuthMiddleware} = require("./middlewares/authMiddleware");
+const {serviceProviderMiddleware} = require("./middlewares/serviceProviderMiddleware");
+const {userAuthMiddleware} = require("./middlewares/userAuthMiddleware ");
+const providerController = require('./controller/serviceProviderController');
+const userController = require('./controller/userController');
+const fileUpload = require("express-fileupload")
+const swaggerUi = require('swagger-ui-express');
+const swaggerJsdoc = require('swagger-jsdoc');
+
+// const {userAuthMiddleware} = require("./middlewares/authMiddleware");
+
+const corsOptions = {
+ 
+  origin: 'http://192.168.1.6',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
+// app.use(cors());
+app.use(fileUpload( {useTempFiles: true,tempFileDir: '/tmp/'}));
+app.use(express.json());
+app.use(express.static("public"));
+
+
+// Admin Routes
+
+app.get("/admin-registration",adminAuthMiddleware,indexController.ViewAdmin);
+app.post("/admin-registration",adminAuthMiddleware,indexController.AdminRegistration);
+app.delete("/admin-registration/:id",adminAuthMiddleware,indexController.DeleteAdmin);
+// app.put("/register/:id",indexController.UpdateDocument);
+
+// Admin State Routes 
+app.post("/admin-addstate",adminAuthMiddleware,indexController.AdminAddState);
+app.get("/admin-readstate",adminAuthMiddleware,indexController.AdminReadState);
+app.delete("/admin-deletestate/:id",adminAuthMiddleware,indexController.AdminDeleteState);
+
+// Admin City Routes
+app.post("/admin-addcity",adminAuthMiddleware,indexController.AdminAddCity);
+app.get("/admin-readcity",adminAuthMiddleware,indexController.AdminReadCity);
+app.delete("/admin-deletecity/:id",adminAuthMiddleware,indexController.AdminDeleteCity);
+
+
+
+
+// Admin Category Route
+
+app.post("/managecategory",adminAuthMiddleware,indexController.addCategory);
+app.get("/managecategory",adminAuthMiddleware,indexController.getCategory);
+app.delete("/managecategory/:id",adminAuthMiddleware,indexController.deleteCategory);
+
+
+
+
+// Admin SubCategory Route
+app.post("/managesubcategory",adminAuthMiddleware,indexController.addSubCategory);
+app.get("/managesubcategory",adminAuthMiddleware,indexController.getSubCategory);
+app.delete("/managesubcategory/:id",adminAuthMiddleware,indexController.deleteSubCategory);
+
+// Admin Provider Info Routes
+app.get("/admin/providerinfo",adminAuthMiddleware,indexController.serviceProviderInfo);
+app.delete("/admin/providerinfo/:id",adminAuthMiddleware,indexController.deleteProviderInfo);
+app.put("/provider-status/:id",indexController.updateStatus)
+
+// Admin User Info Routes
+
+app.get("/admin/userinfo",adminAuthMiddleware,indexController.userInfo);
+app.delete("/admin/userinfo/:id",adminAuthMiddleware,indexController.deleteUserInfo);
+
+// Admin Forgot Passowrd Routes
+app.post("/admin/verifyemail",indexController.adminForgotPass)
+app.post("/admin/verifyotp",indexController.adminVerifyOTP)
+app.post("/admin/updatePassword",indexController.updatePassword)
+
+// User Forgot Password Routes
+
+app.post("/user/verifyemail",userController.userForgotPass)
+app.post("/user/verifyotp",userController.userVerifyOTP)
+app.post("/user/updatePassword",userController.userUpdatePassword);
+
+// user Change Password
+app.put("/user/changepassword",userAuthMiddleware,userController.userChangePassword);
+
+
+
+// Service Provider Forgot Password Routes
+app.post("/provider/verifyemail",providerController.providerForgotPass)
+app.post("/provider/verifyotp",providerController.providerVerifyOTP)
+app.post("/provider/updatePassword",providerController.providerUpdatePassword);
+
+
+
+
+// Service Provider
+app.get('/provider/city/:id',indexController.providerGetCity);
+app.get("/provider/state",indexController.providerGetState);
+app.get('/managesubcategory/:id',indexController.readsubcat);
+app.get("/provider/managecategory",indexController.providerGetCategory);
+app.post("/serviceprovider",indexController.addServiceProvider);
+
+app.get("/serviceprovider/info",serviceProviderMiddleware,providerController.getProviderInfo);
+app.delete("/serviceprovider/info/:id",serviceProviderMiddleware,providerController.deleteProviderInfo);
+
+
+
+
+app.post("/serviceproviderlogin",indexController.chkServiceProvider);
+app.put("/serviceprovider/changepassword",serviceProviderMiddleware,providerController.serviceChangePassword);
+// app.get("/serviceprovider/subcategory",indexController.getSubCategory);
+
+
+
+// User Routes
+/**
+ * @openapi
+ * /user-registration:
+ *   post:
+ *     tags:
+ *       - Users
+ *     summary: Register a new user
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               fullName:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *               mobile:
+ *                 type: string
+ *     responses:
+ *       '201':
+ *         description: User created
+ *       '400':
+ *         description: Validation error
+ */
+app.post("/user-registration",userController.userRegistration);
+app.get("/user-registration",userAuthMiddleware,userController.viewUser);
+app.delete("/user-registration/:id",userAuthMiddleware,userController.deleteUser);
+app.post("/user-login",userController.chkUser);
+
+
+
+
+
+
+// Admin Login
+
+/**
+ * @openapi
+ * /admin-login:
+ *   post:
+ *     tags:
+ *       - Admin
+ *     summary: Admin login
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       '200':
+ *         description: Login successful
+ *       '401':
+ *         description: Unauthorized
+ */
+app.post("/admin-login",indexController.chkAdminLogin);
+
+
+
+// Admin  update routes
+app.get('/view-single-category/:id', adminAuthMiddleware, indexController.ViewSingleCategory);
+
+app.post('/category-photo-update/:id', adminAuthMiddleware, indexController.CategoryUpdatePhoto);
+
+app.put("/updatecategory/:id",adminAuthMiddleware,indexController.editCategory);
+
+app.get('/view-single-subcategory/:id', adminAuthMiddleware, indexController.ViewSingleSubCategory);
+
+app.post('/subcategory-photo-update/:id', adminAuthMiddleware, indexController.SubCategoryUpdatePhoto);
+
+app.put("/updatesubcategory/:id",adminAuthMiddleware,indexController.editSubCategory);
+
+
+app.get('/view-single-state/:id', adminAuthMiddleware, indexController.ViewSingleState);
+
+// app.post('/state-photo-update/:id', adminAuthMiddleware, indexController.StateUpdatePhoto);
+
+app.put("/updatestate/:id",adminAuthMiddleware,indexController.editState);
+
+
+app.get('/view-single-city/:id', adminAuthMiddleware, indexController.ViewSingleCity);
+
+app.put("/updatecity/:id",adminAuthMiddleware,indexController.editCity);
+
+
+
+
+
+app.get('/view-single-provider/:id', serviceProviderMiddleware, providerController.ViewSingleProvider);
+
+app.post('/provider-photo-update/:id', serviceProviderMiddleware, providerController.ProviderUpdatePhoto);
+
+app.put("/updateprovider/:id",serviceProviderMiddleware,providerController.editProvider);
+
+
+app.get('/view-single-user', userAuthMiddleware, userController.ViewSingleUser);
+
+app.post('/user-photo-update', userAuthMiddleware, userController.UserUpdatePhoto);
+
+app.put("/updateuser",userAuthMiddleware,userController.editUser);
+
+
+
+
+
+
+
+
+// Admin Booking
+
+app.get('/adminbookingdata',adminAuthMiddleware, indexController.ViewBookingData);
+
+// Provider Booking
+
+app.get('/providerbookingdata',serviceProviderMiddleware, providerController.ViewBookingData);
+
+// User Booking
+app.get('/userbookingdata',userAuthMiddleware, userController.UserBookingData);
+
+
+// Update Booking Status
+app.put("/updateBookingStatus", providerController.UpdateStatus);
+app.put("/userbookingstatus",userAuthMiddleware, userController.UpdateStatus);
+
+
+
+// public routes
+
+// get provider Route of specific subcategory
+app.get("/subcatprovider/:id",indexController.SubCatProvider);
+app.get("/manageproviders/:subid",indexController.publicProvider);
+
+
+// all providers
+app.get("/providerinfo",indexController.AllProviders);
+
+
+
+
+
+// user Protected Routes
+app.get("/user/managecategory",userAuthMiddleware,userController.userGetCategory);
+
+
+// Booking ROutes
+
+// app.post('/api/bookings', userController.booking)
+
+
+//   app.get('/api/bookings/booked-slots', userController.chkSlots );
+
+
+
+
+
+
+  app.post('/check-available-slots', providerController.ReadAvailableSlots);
+
+  app.post("/user-booking",userAuthMiddleware,userController.Booking)
+
+
+
+
+
+  app.post("/submitreview",userAuthMiddleware,userController.userFeedback);
+
+  // Contact us
+
+app.post("/contact",indexController.contactInfo);
+
+
+
+  // feedback data
+
+app.get("/getFeedback",indexController.getFeedback);
+app.get("/getParticularFeedback/:pid",indexController.getParticularFeedback);
+
+  
+
+
+
+
+
+
+
+
+
+
+
+app.get('/test-cors', (req, res) => {
+  res.json({ message: 'CORS is working!' });
+});
+
+
+
+app.get('/', (req, res) => {
+    res.send('Hello World! Welcome to your Express server.');
+});
+
+// -----------------------------------------------
+// -----------------------------------------------
+
+const port =  process.env.PORT || 5000; // Define the port the server will listen on
+
+// Start the server and listen on the specified port
+// Build a minimal OpenAPI spec by reading defined routes from the Express app
+function generateSwaggerSpec(app) {
+  const paths = {};
+  const stack = app && app._router && app._router.stack ? app._router.stack : [];
+
+  // Build a map of controller function -> controller name for tagging
+  const controllers = { indexController, providerController, userController };
+  const controllerMap = new Map();
+  Object.keys(controllers).forEach((cname) => {
+    const cobj = controllers[cname] || {};
+    Object.keys(cobj).forEach((fnName) => {
+      const fn = cobj[fnName];
+      if (typeof fn === 'function') controllerMap.set(fn, cname.replace('Controller', ''));
+    });
+  });
+  stack.forEach((layer) => {
+    if (layer.route && layer.route.path) {
+      const routePath = layer.route.path;
+      const methods = layer.route.methods || {};
+
+      // convert Express path params ":id" to OpenAPI "{id}"
+      const swaggerPath = routePath.replace(/:([^/]+)/g, '{$1}');
+
+      // collect path parameters
+      const paramNames = [];
+      const paramRegex = /:([^/]+)/g;
+      let m;
+      while ((m = paramRegex.exec(routePath)) !== null) { paramNames.push(m[1]); }
+
+      paths[swaggerPath] = paths[swaggerPath] || {};
+      Object.keys(methods).forEach((method) => {
+        // try to detect controller tag by inspecting the route handlers
+        let tag = 'default';
+        try {
+          const handlers = layer.route.stack.map(l => l.handle).filter(Boolean);
+          for (let h of handlers) {
+            if (controllerMap.has(h)) { tag = controllerMap.get(h); break; }
+          }
+        } catch (e) {}
+
+        const entry = {
+          tags: [tag],
+          summary: `${method.toUpperCase()} ${routePath}`,
+          parameters: paramNames.map(name => ({ name, in: 'path', required: true, schema: { type: 'string' } })),
+          responses: {
+            '200': { description: 'Successful response', content: { 'application/json': { schema: { type: 'object' } } } },
+            '400': { description: 'Bad Request' },
+            '500': { description: 'Server Error' }
+          }
+        };
+
+        // Add a generic requestBody for POST/PUT so UI shows body editor
+        if (['post', 'put', 'patch'].includes(method)) {
+          entry.requestBody = {
+            required: false,
+            content: {
+              'application/json': { schema: { type: 'object' } }
+            }
+          };
+        }
+
+        paths[swaggerPath][method] = entry;
+      });
+    }
+  });
+
+  return {
+    openapi: '3.0.0',
+    info: {
+      title: 'DoorStepService API',
+      version: '1.0.0',
+      description: 'Auto-generated API documentation for all registered Express routes.'
+    },
+    servers: [{ url: `http://localhost:${port}` }],
+    paths
+  };
+}
+
+// Use swagger-jsdoc to read JSDoc/OpenAPI comments in files
+const swaggerDefinition = {
+  openapi: '3.0.0',
+  info: {
+    title: 'DoorStepService API',
+    version: '1.0.0',
+    description: 'Combined auto-generated and JSDoc-based API documentation.'
+  },
+  servers: [{ url: `http://localhost:${port}` }]
+};
+
+const jsdocOptions = {
+  definition: swaggerDefinition,
+  // scan this file and controller files for JSDoc comments
+  apis: [__filename, __dirname + '/controller/*.js']
+};
+
+const jsdocSpec = swaggerJsdoc(jsdocOptions);
+const autoSpec = generateSwaggerSpec(app);
+
+// Merge paths: prefer detailed JSDoc paths, fall back to auto-generated
+const mergedSpec = Object.assign({}, jsdocSpec);
+mergedSpec.paths = mergedSpec.paths || {};
+Object.keys(autoSpec.paths || {}).forEach((p) => {
+  if (!mergedSpec.paths[p]) mergedSpec.paths[p] = autoSpec.paths[p];
+  else {
+    // merge methods if missing
+    Object.keys(autoSpec.paths[p]).forEach((m) => {
+      if (!mergedSpec.paths[p][m]) mergedSpec.paths[p][m] = autoSpec.paths[p][m];
+    });
+  }
+});
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(mergedSpec));
+app.get('/swagger.json', (req, res) => res.json(mergedSpec));
+
+app.listen(port, () => {
+  console.log(`Server is running on http://localhost:${port}`);
+});
